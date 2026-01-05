@@ -1,0 +1,3 @@
+[submodule "lib/sql"]
+	path = lib/sql
+	url = https://github.com/rua-plus/blog.git
