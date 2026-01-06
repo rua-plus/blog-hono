@@ -1,0 +1,9 @@
+{
+  "postgresql": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "blog_db",
+    "user": "postgres",
+    "password": "your_password"
+  }
+}

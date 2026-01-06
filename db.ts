@@ -1,12 +1,51 @@
 // Import PostgreSQL client
 import { Client } from "postgres";
 
-// Read configuration from config.json using Deno's built-in synchronous API
 // Read configuration from config.json
-const configFile = Deno.readTextFileSync(
-  new URL("../config.json", import.meta.url),
-);
-const config = JSON.parse(configFile);
+let configFile: string;
+try {
+  configFile = Deno.readTextFileSync(
+    new URL("./config.json", import.meta.url),
+  );
+} catch (error: unknown) {
+  let errorMessage: string;
+  if (error instanceof Deno.errors.NotFound) {
+    errorMessage = `Error reading config.json: File not found`;
+  } else if (error instanceof Deno.errors.PermissionDenied) {
+    errorMessage = `Error reading config.json: Permission denied`;
+  } else if (error instanceof Error) {
+    errorMessage = `Error reading config.json: ${error.message}`;
+  } else {
+    errorMessage = `Error reading config.json: Unknown error`;
+  }
+  console.error(errorMessage);
+  throw new Error(errorMessage);
+}
+
+// Define configuration types
+interface Config {
+  postgresql: {
+    host: string;
+    port: number;
+    database: string;
+    user: string;
+    password: string;
+  };
+}
+
+let config: Config;
+try {
+  config = JSON.parse(configFile);
+} catch (error: unknown) {
+  let errorMessage: string;
+  if (error instanceof Error) {
+    errorMessage = `Error parsing config.json: ${error.message}`;
+  } else {
+    errorMessage = "Error parsing config.json: Unknown error";
+  }
+  console.error(errorMessage);
+  throw new Error(errorMessage);
+}
 
 // Extract PostgreSQL configuration
 const postgresConfig = config.postgresql;
