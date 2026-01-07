@@ -1,5 +1,6 @@
 {
   "imports": {
+    "@felix/argon2": "jsr:@felix/argon2@^3.0.3",
     "@sitnik/nanoid": "jsr:@sitnik/nanoid@^5.1.5",
     "hono": "jsr:@hono/hono@^4.11.3",
     "postgres": "jsr:@db/postgres@^0.19.5"
