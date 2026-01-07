@@ -5,6 +5,8 @@
     "jsr:@denosaurs/plug@^1.1.0": "1.1.0",
     "jsr:@felix/argon2@^3.0.3": "3.0.3",
     "jsr:@hono/hono@^4.11.3": "4.11.3",
+    "jsr:@hono/hono@^4.8.3": "4.11.3",
+    "jsr:@hono/zod-validator@~0.7.6": "0.7.6",
     "jsr:@sitnik/nanoid@^5.1.5": "5.1.5",
     "jsr:@std/bytes@^1.0.5": "1.0.6",
     "jsr:@std/crypto@^1.0.4": "1.0.5",
@@ -16,7 +18,9 @@
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/path@1": "1.1.4",
     "jsr:@std/path@^1.0.8": "1.1.4",
-    "jsr:@std/path@^1.1.4": "1.1.4"
+    "jsr:@std/path@^1.1.4": "1.1.4",
+    "npm:zod@^4.1.13": "4.3.5",
+    "npm:zod@^4.3.5": "4.3.5"
   },
   "jsr": {
     "@db/postgres@0.19.5": {
@@ -46,6 +50,13 @@
     },
     "@hono/hono@4.11.3": {
       "integrity": "de7f245516a970c60c6f4bf5b0f1585efbee38ee4e01171994c2b9d69d035d70"
+    },
+    "@hono/zod-validator@0.7.6": {
+      "integrity": "cc15ec57dd8a49e49d81f1790fb2d35cb96c9d3b8b14d8d0b851c00ab00e50ca",
+      "dependencies": [
+        "jsr:@hono/hono@^4.8.3",
+        "npm:zod@^4.1.13"
+      ]
     },
     "@sitnik/nanoid@5.1.5": {
       "integrity": "55bd5f57087d67b1dcb7c1f4a07efdfe77a3ac57ca0af90f162c1f676ebf8f4b"
@@ -77,6 +88,11 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
+    }
+  },
+  "npm": {
+    "zod@4.3.5": {
+      "integrity": "sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g=="
     }
   },
   "remote": {
@@ -273,7 +289,9 @@
       "jsr:@db/postgres@~0.19.5",
       "jsr:@felix/argon2@^3.0.3",
       "jsr:@hono/hono@^4.11.3",
-      "jsr:@sitnik/nanoid@^5.1.5"
+      "jsr:@hono/zod-validator@~0.7.6",
+      "jsr:@sitnik/nanoid@^5.1.5",
+      "npm:zod@^4.3.5"
     ]
   }
 }

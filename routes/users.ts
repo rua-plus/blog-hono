@@ -1,4 +1,6 @@
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
 import { db } from "../db.ts";
 import {
   honoErrorResponse,
@@ -7,69 +9,29 @@ import {
 } from "../response.ts";
 import { hashPassword } from "../utils/password.ts";
 
-// 用户创建请求接口
-interface CreateUserRequest {
-  username: string;
-  email: string;
-  password: string;
-  avatar_url?: string;
-  bio?: string;
-}
-
-// 用户验证函数
-function validateUser(data: any): data is CreateUserRequest {
-  if (
-    !data.username || typeof data.username !== "string" ||
-    data.username.length > 50
-  ) {
-    return false;
-  }
-  if (
-    !data.email || typeof data.email !== "string" || data.email.length > 100 ||
-    !/^\S+@\S+\.\S+$/.test(data.email)
-  ) {
-    return false;
-  }
-  if (
-    !data.password || typeof data.password !== "string" ||
-    data.password.length > 255
-  ) {
-    return false;
-  }
-  if (data.avatar_url && (typeof data.avatar_url !== "string")) {
-    return false;
-  }
-  if (data.bio && (typeof data.bio !== "string")) {
-    return false;
-  }
-  return true;
-}
+// 用户创建请求的 Zod 验证 schema
+const CreateUserSchema = z.object({
+  username: z.string().min(1, "用户名不能为空").max(
+    50,
+    "用户名长度不能超过50个字符",
+  ),
+  email: z.string().min(1, "邮箱不能为空").email("邮箱格式无效").max(
+    100,
+    "邮箱长度不能超过100个字符",
+  ),
+  password: z.string().min(1, "密码不能为空").max(
+    255,
+    "密码长度不能超过255个字符",
+  ),
+  avatar_url: z.string().url("头像URL格式无效").optional(),
+  bio: z.string().max(500, "个人简介长度不能超过500个字符").optional(),
+});
 
 export function registerUsers(app: Hono) {
-  app.post("/users", async (c) => {
+  app.post("/users", zValidator("json", CreateUserSchema), async (c) => {
     try {
-      // 获取请求体
-      const body = await c.req.json();
-
-      // 验证请求参数
-      if (!validateUser(body)) {
-        return honoErrorResponse(
-          c,
-          "参数验证失败，请检查输入的字段",
-          StatusCode.VALIDATION_ERROR,
-          [
-            {
-              field: "username",
-              message: "用户名必须是字符串，长度不超过50个字符",
-            },
-            { field: "email", message: "邮箱必须是有效的电子邮件地址" },
-            {
-              field: "password",
-              message: "密码必须是字符串，长度不超过255个字符",
-            },
-          ],
-        );
-      }
+      // 获取验证后的请求体
+      const body = c.req.valid("json");
 
       // 密码哈希
       const password_hash = await hashPassword(body.password);

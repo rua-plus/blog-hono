@@ -1,9 +1,11 @@
 {
   "imports": {
     "@felix/argon2": "jsr:@felix/argon2@^3.0.3",
+    "@hono/zod-validator": "jsr:@hono/zod-validator@^0.7.6",
     "@sitnik/nanoid": "jsr:@sitnik/nanoid@^5.1.5",
     "hono": "jsr:@hono/hono@^4.11.3",
-    "postgres": "jsr:@db/postgres@^0.19.5"
+    "postgres": "jsr:@db/postgres@^0.19.5",
+    "zod": "npm:zod@^4.3.5"
   },
   "tasks": {
     "start": "deno run --allow-net --allow-read --allow-env main.ts"
