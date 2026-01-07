@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { logger } from "hono/logger";
 import { connectDB } from "./db.ts";
 import { registerRoutes } from "./routes/index.ts";
 import { requestIdMiddleware } from "./middleware.ts";
@@ -11,6 +12,9 @@ app.use("*", cors());
 
 // 启用请求ID中间件
 app.use("*", requestIdMiddleware);
+
+// 启用 logger 中间件
+app.use("*", logger());
 
 registerRoutes(app);
 
