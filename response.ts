@@ -91,6 +91,7 @@ export function successResponse<T>(
   message: string = "操作成功",
   code: number = StatusCode.SUCCESS,
   version?: string,
+  requestId?: string,
 ): SuccessResponse<T> {
   return {
     success: true,
@@ -98,7 +99,7 @@ export function successResponse<T>(
     message,
     data,
     timestamp: Date.now(),
-    requestId: nanoid(),
+    requestId: requestId || nanoid(),
     version,
   };
 }
@@ -110,6 +111,7 @@ export function errorResponse(
   errors?: Array<{ field?: string; message: string }>,
   path?: string,
   debug?: string,
+  requestId?: string,
 ): ErrorResponse {
   return {
     success: false,
@@ -117,7 +119,7 @@ export function errorResponse(
     message,
     errors,
     timestamp: Date.now(),
-    requestId: nanoid(),
+    requestId: requestId || nanoid(),
     path,
     debug,
   };
@@ -129,6 +131,7 @@ export function paginationResponse<T>(
   pagination: PaginationInfo,
   message: string = "查询成功",
   code: StatusCode = StatusCode.SUCCESS,
+  requestId?: string,
 ): PaginationResponse<T> {
   return {
     success: true,
@@ -139,7 +142,7 @@ export function paginationResponse<T>(
       pagination,
     },
     timestamp: Date.now(),
-    requestId: nanoid(),
+    requestId: requestId || nanoid(),
   };
 }
 
@@ -152,8 +155,9 @@ export function honoSuccessResponse<T>(
   version?: string,
 ) {
   const httpCode = code < 1000 ? code : StatusCode.HTTP_OK;
+  const requestId = c.get("requestId") as string;
   return c.json(
-    successResponse(data, message, code, version),
+    successResponse(data, message, code, version, requestId),
     httpCode as StatusCode.HTTP_OK,
   );
 }
@@ -166,8 +170,9 @@ export function honoErrorResponse(
   debug?: string,
 ) {
   const httpCode = code < 1000 ? code : StatusCode.HTTP_BAD_REQUEST;
+  const requestId = c.get("requestId") as string;
   return c.json(
-    errorResponse(message, code, errors, c.req.path, debug),
+    errorResponse(message, code, errors, c.req.path, debug, requestId),
     httpCode as StatusCode.HTTP_OK,
   );
 }
@@ -180,8 +185,9 @@ export function honoPaginationResponse<T>(
   code: StatusCode = StatusCode.SUCCESS,
 ) {
   const httpCode = code < 1000 ? code : StatusCode.HTTP_OK;
+  const requestId = c.get("requestId") as string;
   return c.json(
-    paginationResponse(list, pagination, message, code),
+    paginationResponse(list, pagination, message, code, requestId),
     httpCode as StatusCode.HTTP_OK,
   );
 }
