@@ -10,7 +10,7 @@ export async function requestIdMiddleware(c: Context, next: Next) {
   c.set("requestId", requestId);
 
   // 将请求ID添加到响应头中
-  c.res.headers.set("X-Request-ID", requestId);
+  c.header("X-Request-ID", requestId);
 
   // 继续处理下一个中间件或路由
   await next();

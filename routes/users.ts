@@ -15,7 +15,7 @@ const CreateUserSchema = z.object({
     50,
     "用户名长度不能超过50个字符",
   ),
-  email: z.string().min(1, "邮箱不能为空").email("邮箱格式无效").max(
+  email: z.email("邮箱格式无效").max(
     100,
     "邮箱长度不能超过100个字符",
   ),
@@ -23,7 +23,7 @@ const CreateUserSchema = z.object({
     255,
     "密码长度不能超过255个字符",
   ),
-  avatar_url: z.string().url("头像URL格式无效").optional(),
+  avatar_url: z.url("头像URL格式无效").optional(),
   bio: z.string().max(500, "个人简介长度不能超过500个字符").optional(),
 });
 
