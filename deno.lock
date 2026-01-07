@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@db/postgres@~0.19.5": "0.19.5",
     "jsr:@hono/hono@^4.11.3": "4.11.3",
+    "jsr:@sitnik/nanoid@^5.1.5": "5.1.5",
     "jsr:@std/bytes@^1.0.5": "1.0.6",
     "jsr:@std/crypto@^1.0.4": "1.0.5",
     "jsr:@std/encoding@^1.0.9": "1.0.10",
@@ -23,6 +24,9 @@
     },
     "@hono/hono@4.11.3": {
       "integrity": "de7f245516a970c60c6f4bf5b0f1585efbee38ee4e01171994c2b9d69d035d70"
+    },
+    "@sitnik/nanoid@5.1.5": {
+      "integrity": "55bd5f57087d67b1dcb7c1f4a07efdfe77a3ac57ca0af90f162c1f676ebf8f4b"
     },
     "@std/bytes@1.0.6": {
       "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
@@ -206,7 +210,8 @@
   "workspace": {
     "dependencies": [
       "jsr:@db/postgres@~0.19.5",
-      "jsr:@hono/hono@^4.11.3"
+      "jsr:@hono/hono@^4.11.3",
+      "jsr:@sitnik/nanoid@^5.1.5"
     ]
   }
 }

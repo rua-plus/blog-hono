@@ -1,8 +1,8 @@
 {
   "imports": {
+    "@sitnik/nanoid": "jsr:@sitnik/nanoid@^5.1.5",
     "hono": "jsr:@hono/hono@^4.11.3",
-    "postgres": "jsr:@db/postgres@^0.19.5",
-    "argon2": "https://deno.land/x/argon2@v0.9.2/mod.ts"
+    "postgres": "jsr:@db/postgres@^0.19.5"
   },
   "tasks": {
     "start": "deno run --allow-net --allow-read --allow-env main.ts"

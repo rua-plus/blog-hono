@@ -1,6 +1,24 @@
 // Import PostgreSQL client
 import { Client } from "postgres";
 
+// 通用错误处理函数
+function handleError(error: unknown, context: string): never {
+  let errorMessage: string;
+  if (error instanceof Deno.errors.NotFound) {
+    errorMessage = `Error ${context}: File not found`;
+  } else if (error instanceof Deno.errors.PermissionDenied) {
+    errorMessage = `Error ${context}: Permission denied`;
+  } else if (error instanceof Error) {
+    errorMessage = `Error ${context}: ${error.message}`;
+  } else if (typeof error === "object" && error !== null) {
+    errorMessage = `Error ${context}: ${JSON.stringify(error, null, 2)}`;
+  } else {
+    errorMessage = `Error ${context}: ${String(error)}`;
+  }
+  console.error(errorMessage);
+  throw new Error(errorMessage);
+}
+
 // Read configuration from config.json
 let configFile: string;
 try {
@@ -8,18 +26,7 @@ try {
     new URL("./config.json", import.meta.url),
   );
 } catch (error: unknown) {
-  let errorMessage: string;
-  if (error instanceof Deno.errors.NotFound) {
-    errorMessage = `Error reading config.json: File not found`;
-  } else if (error instanceof Deno.errors.PermissionDenied) {
-    errorMessage = `Error reading config.json: Permission denied`;
-  } else if (error instanceof Error) {
-    errorMessage = `Error reading config.json: ${error.message}`;
-  } else {
-    errorMessage = `Error reading config.json: Unknown error`;
-  }
-  console.error(errorMessage);
-  throw new Error(errorMessage);
+  handleError(error, "reading config.json");
 }
 
 // Define configuration types
@@ -37,14 +44,7 @@ let config: Config;
 try {
   config = JSON.parse(configFile);
 } catch (error: unknown) {
-  let errorMessage: string;
-  if (error instanceof Error) {
-    errorMessage = `Error parsing config.json: ${error.message}`;
-  } else {
-    errorMessage = "Error parsing config.json: Unknown error";
-  }
-  console.error(errorMessage);
-  throw new Error(errorMessage);
+  handleError(error, "parsing config.json");
 }
 
 // Extract PostgreSQL configuration
@@ -65,17 +65,7 @@ export async function connectDB() {
     await db.connect();
     console.log("Successfully connected to PostgreSQL database!");
   } catch (error: unknown) {
-    let errorMessage: string;
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    } else if (typeof error === "object" && error !== null) {
-      errorMessage = JSON.stringify(error, null, 2);
-    } else {
-      errorMessage = String(error);
-    }
-
-    console.error("Error connecting to PostgreSQL database:", errorMessage);
-    throw error; // Rethrow error to let the application handle it
+    handleError(error, "connecting to PostgreSQL database");
   }
 }
 
@@ -85,19 +75,6 @@ export async function closeDB() {
     await db.end();
     console.log("Successfully closed PostgreSQL database connection!");
   } catch (error: unknown) {
-    let errorMessage: string;
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    } else if (typeof error === "object" && error !== null) {
-      errorMessage = JSON.stringify(error, null, 2);
-    } else {
-      errorMessage = String(error);
-    }
-
-    console.error(
-      "Error closing PostgreSQL database connection:",
-      errorMessage,
-    );
-    throw error;
+    handleError(error, "closing PostgreSQL database connection");
   }
 }
