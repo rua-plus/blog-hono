@@ -14,6 +14,9 @@ A simple blog API built with Hono (web framework) and PostgreSQL (database) in D
 - **Hono**: Web framework for building APIs
 - **PostgreSQL**: Relational database
 - **postgres.js**: PostgreSQL client for JavaScript/TypeScript
+- **Zod**: Schema validation library
+- **Argon2**: Password hashing and verification
+- **nanoid**: Unique ID generation
 
 ## Development Commands
 
@@ -27,31 +30,53 @@ This runs the API server with required permissions:
 - --allow-net: Allow network access
 - --allow-read: Allow file reading (for config.json)
 - --allow-env: Allow environment access
+- --allow-ffi: Allow FFI for Argon2 hashing
 
-### Dependencies
+### Running Tests
 
-Dependencies are managed via Deno's import maps in `deno.json`:
-- hono: ^4.11.3
-- @db/postgres: ^0.19.5
-- @sitnik/nanoid: ^5.1.5
+```bash
+deno test
+```
+
+To run a single test file:
+```bash
+deno test test/password.test.ts
+```
+
+### Linting
+
+```bash
+deno lint
+```
+
+### Formatting
+
+```bash
+deno fmt
+```
 
 ## Code Architecture
 
-### Main Files
+### Main Entry Point
 
-1. **main.ts**: Entry point of the application
-   - Creates Hono app instance
-   - Defines API routes
-   - Handles database connection on startup
-   - Serves the API
+**main.ts** - Entry point of the application
+- Creates Hono app instance
+- Enables CORS middleware
+- Enables request ID middleware
+- Enables detailed logger middleware (with requestId)
+- Registers all API routes
+- Handles database connection on startup
+- Serves the API
 
-2. **db.ts**: Database connection management
+### Core Modules
+
+1. **db.ts**: Database connection management
    - Reads configuration from config.json
    - Creates PostgreSQL client instance
    - Exports connectDB(), closeDB(), and db client
    - Handles errors with generic error handler
 
-3. **response.ts**: Response utilities
+2. **response.ts**: Response utilities
    - Defines StatusCode enum with HTTP and business status codes
    - Provides response helper functions:
      - successResponse(): Standard success response
@@ -61,24 +86,59 @@ Dependencies are managed via Deno's import maps in `deno.json`:
      - honoErrorResponse(): Hono-specific error response
      - honoPaginationResponse(): Hono-specific pagination response
 
-4. **config.json**: Database configuration
-   - PostgreSQL connection settings (host, port, database, user, password)
+3. **middleware.ts**: Custom middleware
+   - requestIdMiddleware: Generates unique request ID for each request
+   - detailedLoggerMiddleware: Logs detailed request/response information with requestId
+
+4. **routes/**: API route handlers
+   - **index.ts**: Main route registration
+   - **users.ts**: User-related routes (create user endpoint with validation)
+
+5. **utils/**: Utility functions
+   - **password.ts**: Password hashing and verification using Argon2
+
+6. **test/**: Test files
+   - **password.test.ts**: Tests for password hashing and verification
+
+7. **lib/sql/**: Database schema (submodule)
+   - Contains SQL files for initializing database tables (users, posts, categories, comments, tags, media)
 
 ### Configuration
 
 Database connection settings are stored in `config.json`. A template is available at `config.example.json`.
 
+```json
+{
+  "postgresql": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "blog_db",
+    "user": "postgres",
+    "password": "your_password"
+  }
+}
+```
+
 ### API Routes
 
 - **GET /**: Returns "Hello Hono!" message (welcome endpoint)
-- **GET /test-db**: Tests PostgreSQL connection and returns version
+- **GET /db-version**: Tests PostgreSQL connection and returns version
+- **POST /users/create**: Creates a new user with validation
 
 ### Error Handling
 
 - Generic error handler in `db.ts:handleError()`
 - Error responses via `honoErrorResponse()` function
 - Success responses via `honoSuccessResponse()` function
+- Validation errors handled by Zod validator middleware
 
 ### Database Schema
 
-SQL files are stored in `lib/sql/sql/` directory (submodule).
+The database schema is defined in `lib/sql/sql/init.sql` and includes the following tables:
+
+1. **users**: User information (id, username, email, password_hash, avatar_url, bio, last_login, created_at, updated_at)
+2. **posts**: Blog posts (id, title, slug, content, excerpt, author_id, status, published_at, created_at, updated_at)
+3. **categories**: Post categories (id, name, slug, description, parent_id)
+4. **comments**: Post comments (id, post_id, user_id, parent_id, author_name, author_email, content, status, created_at, updated_at)
+5. **tags**: Post tags (id, name, slug)
+6. **media**: Media files (id, filename, file_path, file_type, file_size, uploader_id, alt_text, created_at)
