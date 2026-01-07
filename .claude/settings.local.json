@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "WebSearch",
+      "Bash(deno info:*)",
+      "WebFetch(domain:deno.land)",
+      "Bash(deno lint:*)",
+      "Bash(curl:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs:*)",
+      "WebFetch(domain:hono.dev)",
+      "Bash(pkill:*)"
     ]
   }
 }

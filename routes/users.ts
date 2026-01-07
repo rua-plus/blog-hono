@@ -28,7 +28,20 @@ const CreateUserSchema = z.object({
 });
 
 export function registerUsers(app: Hono) {
-  app.post("/users", zValidator("json", CreateUserSchema), async (c) => {
+  app.post("/users/create", zValidator("json", CreateUserSchema, (result, c) => {
+    if (!result.success) {
+      const errors = result.error.issues.map(issue => ({
+        field: issue.path.join("."),
+        message: issue.message,
+      }));
+      return honoErrorResponse(
+        c,
+        "请求参数验证失败",
+        StatusCode.VALIDATION_ERROR,
+        errors,
+      );
+    }
+  }), async (c) => {
     try {
       // 获取验证后的请求体
       const body = c.req.valid("json");
