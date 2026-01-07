@@ -5,9 +5,10 @@ import { hash, Variant, verify, Version } from "@felix/argon2";
  * @param password 原始密码
  * @returns 哈希后的密码字符串
  */
-export async function hashPassword(password: string): Promise<string> {
+export async function hashPassword(password: string | number): Promise<string> {
   try {
-    const hashedPassword = await hash(password, {
+    const passwordStr = String(password);
+    const hashedPassword = await hash(passwordStr, {
       variant: Variant.Argon2id,
       memoryCost: 19456, // 19 MiB 内存（以 KB 为单位）
       timeCost: 2, // 迭代次数为 2
@@ -29,10 +30,11 @@ export async function hashPassword(password: string): Promise<string> {
  */
 export async function verifyPassword(
   hash: string,
-  password: string,
+  password: string | number,
 ): Promise<boolean> {
   try {
-    const isValid = await verify(hash, password);
+    const passwordStr = String(password);
+    const isValid = await verify(hash, passwordStr);
     return isValid;
   } catch (error) {
     console.error("密码验证失败:", error);
