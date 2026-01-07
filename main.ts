@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { connectDB, db } from "./db.ts";
+import { connectDB, db, formatErrorMessage } from "./db.ts";
 import {
   honoErrorResponse,
   honoSuccessResponse,
@@ -25,7 +25,7 @@ app.get("/test-db", async (c) => {
       "数据库连接失败",
       StatusCode.DATABASE_ERROR,
       undefined,
-      (error as Error).message,
+      formatErrorMessage(error, "/test-db"),
     );
   }
 });

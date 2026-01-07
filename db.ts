@@ -2,7 +2,7 @@
 import { Client } from "postgres";
 
 // 通用错误处理函数
-function handleError(error: unknown, context: string): never {
+export function formatErrorMessage(error: unknown, context: string): string {
   let errorMessage: string;
   if (error instanceof Deno.errors.NotFound) {
     errorMessage = `Error ${context}: File not found`;
@@ -15,6 +15,11 @@ function handleError(error: unknown, context: string): never {
   } else {
     errorMessage = `Error ${context}: ${String(error)}`;
   }
+  return errorMessage;
+}
+
+function handleError(error: unknown, context: string): never {
+  const errorMessage = formatErrorMessage(error, context);
   console.error(errorMessage);
   throw new Error(errorMessage);
 }
