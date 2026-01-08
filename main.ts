@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { connectDB } from "./db.ts";
 import { registerRoutes } from "./routes/index.ts";
-import { requestIdMiddleware, detailedLoggerMiddleware } from "./middleware.ts";
+import { detailedLoggerMiddleware, requestIdMiddleware } from "./middleware.ts";
 
 const app = new Hono();
 

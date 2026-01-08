@@ -11,7 +11,9 @@
       "Bash(lsof:*)",
       "Bash(xargs:*)",
       "WebFetch(domain:hono.dev)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(deno test:*)",
+      "Bash(deno check:*)"
     ]
   }
 }
