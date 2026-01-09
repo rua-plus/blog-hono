@@ -13,7 +13,7 @@ interface JWTPayload {
   username: string;
   email: string;
   exp: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // 获取 JWT 配置
@@ -25,17 +25,22 @@ export async function generateToken(payload: JWTPayload): Promise<string> {
 }
 
 // 验证 JWT
-export async function verifyToken(token: string): Promise<Record<string, any>> {
-  return await verify(token, jwtConfig.secret);
+export async function verifyToken(token: string): Promise<JWTPayload> {
+  return await verify(token, jwtConfig.secret) as JWTPayload;
 }
 
 // 生成用户认证 token
-export async function generateUserToken(userId: string, username: string, email: string): Promise<string> {
+export async function generateUserToken(
+  userId: string,
+  username: string,
+  email: string,
+): Promise<string> {
   const payload = {
     id: userId,
     username,
     email,
-    exp: Math.floor(Date.now() / 1000) + getExpirationSeconds(jwtConfig.expiresIn),
+    exp: Math.floor(Date.now() / 1000) +
+      getExpirationSeconds(jwtConfig.expiresIn),
   };
   return await generateToken(payload);
 }

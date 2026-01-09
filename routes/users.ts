@@ -203,7 +203,7 @@ export function registerUsers(app: Hono) {
         // 返回成功响应
         return honoSuccessResponse(
           c,
-          result.rows[0],
+          result.rows[0] as UserWithoutPassword,
           "用户创建成功",
           StatusCode.CREATED,
         );

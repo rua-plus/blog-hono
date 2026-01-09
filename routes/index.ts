@@ -6,6 +6,7 @@ import {
   StatusCode,
 } from "../response.ts";
 import { registerUsers } from "./users.ts";
+import { registerPosts } from "./posts.ts";
 
 export function registerRoutes(app: Hono) {
   app.get("/", (c) => {
@@ -35,4 +36,5 @@ export function registerRoutes(app: Hono) {
   });
 
   registerUsers(app);
+  registerPosts(app); // 添加文章路由注册
 }
