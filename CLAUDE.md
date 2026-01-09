@@ -17,6 +17,7 @@ A simple blog API built with Hono (web framework) and PostgreSQL (database) in D
 - **Zod**: Schema validation library
 - **Argon2**: Password hashing and verification
 - **nanoid**: Unique ID generation
+- **Hono JWT**: JWT (JSON Web Token) implementation for authentication
 
 ## Development Commands
 
@@ -89,13 +90,20 @@ deno fmt
 3. **middleware.ts**: Custom middleware
    - requestIdMiddleware: Generates unique request ID for each request
    - detailedLoggerMiddleware: Logs detailed request/response information with requestId
+   - jwtAuthMiddleware: JWT authentication middleware that verifies tokens and extracts user information
 
 4. **routes/**: API route handlers
    - **index.ts**: Main route registration
-   - **users.ts**: User-related routes (create user endpoint with validation)
+   - **users.ts**: User-related routes
+     - POST /users/create: Creates a new user with validation
+     - POST /users/login: User login endpoint with JWT token generation
 
 5. **utils/**: Utility functions
    - **password.ts**: Password hashing and verification using Argon2
+   - **jwt.ts**: JWT token generation and verification utilities
+     - generateToken(): Generates JWT with custom payload
+     - verifyToken(): Verifies and decodes JWT
+     - generateUserToken(): Generates user-specific JWT with expiration
 
 6. **test/**: Test files
    - **password.test.ts**: Tests for password hashing and verification
@@ -115,6 +123,10 @@ Database connection settings are stored in `config.json`. A template is availabl
     "database": "blog_db",
     "user": "postgres",
     "password": "your_password"
+  },
+  "jwt": {
+    "secret": "your-secret-key-change-in-production",
+    "expiresIn": "7d"
   }
 }
 ```
@@ -124,6 +136,7 @@ Database connection settings are stored in `config.json`. A template is availabl
 - **GET /**: Returns "Hello Hono!" message (welcome endpoint)
 - **GET /db-version**: Tests PostgreSQL connection and returns version
 - **POST /users/create**: Creates a new user with validation
+- **POST /users/login**: User login with username/email and password, returns JWT token
 
 ### Error Handling
 

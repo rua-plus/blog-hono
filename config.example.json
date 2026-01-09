@@ -5,5 +5,9 @@
     "database": "blog_db",
     "user": "postgres",
     "password": "your_password"
+  },
+  "jwt": {
+    "secret": "your-secret-key-change-in-production",
+    "expiresIn": "7d"
   }
 }
