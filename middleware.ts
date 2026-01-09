@@ -1,5 +1,7 @@
 import type { Context, Next } from "hono";
 import { nanoid } from "@sitnik/nanoid";
+import { verifyToken } from "./utils/jwt.ts";
+import { honoErrorResponse, StatusCode } from "./response.ts";
 
 // 请求ID中间件
 export async function requestIdMiddleware(c: Context, next: Next) {
@@ -87,5 +89,59 @@ export async function detailedLoggerMiddleware(c: Context, next: Next) {
     );
 
     throw error;
+  }
+}
+
+// JWT 认证中间件
+export async function jwtAuthMiddleware(c: Context, next: Next) {
+  try {
+    // 从 Authorization 头部获取 token
+    const authHeader = c.req.header("Authorization");
+    if (!authHeader) {
+      return honoErrorResponse(
+        c,
+        "缺少认证信息",
+        StatusCode.UNAUTHORIZED,
+      );
+    }
+
+    // 检查 Bearer 格式
+    const match = authHeader.match(/^Bearer\s+(\S+)$/);
+    if (!match) {
+      return honoErrorResponse(
+        c,
+        "无效的认证格式",
+        StatusCode.UNAUTHORIZED,
+      );
+    }
+
+    const token = match[1];
+    const decoded = await verifyToken(token);
+
+    // 将解码后的用户信息存储到上下文
+    c.set("user", decoded);
+
+    await next();
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message.includes("Expired")) {
+        return honoErrorResponse(
+          c,
+          "登录已过期，请重新登录",
+          StatusCode.UNAUTHORIZED,
+        );
+      }
+      return honoErrorResponse(
+        c,
+        "无效的token",
+        StatusCode.UNAUTHORIZED,
+      );
+    }
+
+    return honoErrorResponse(
+      c,
+      "认证失败",
+      StatusCode.UNAUTHORIZED,
+    );
   }
 }

@@ -13,7 +13,9 @@
       "WebFetch(domain:hono.dev)",
       "Bash(pkill:*)",
       "Bash(deno test:*)",
-      "Bash(deno check:*)"
+      "Bash(deno check:*)",
+      "Bash(deno task start --help:*)",
+      "Bash(deno run:*)"
     ]
   }
 }

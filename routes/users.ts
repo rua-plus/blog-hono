@@ -8,6 +8,7 @@ import {
   StatusCode,
 } from "../response.ts";
 import { hashPassword, verifyPassword } from "../utils/password.ts";
+import { generateUserToken } from "../utils/jwt.ts";
 
 // 用户数据类型接口
 interface User {
@@ -125,12 +126,23 @@ export function registerUsers(app: Hono) {
         `;
 
         // 移除密码哈希，返回用户信息
-        const { password_hash: _password_hash, ...userWithoutPassword } = updateResult.rows[0] as User;
+        const { password_hash: _password_hash, ...userWithoutPassword } =
+          updateResult.rows[0] as User;
 
-        // 返回成功响应
+        // 生成 JWT
+        const token = await generateUserToken(
+          userWithoutPassword.id,
+          userWithoutPassword.username,
+          userWithoutPassword.email,
+        );
+
+        // 返回成功响应，包含用户信息和 token
         return honoSuccessResponse(
           c,
-          userWithoutPassword,
+          {
+            user: userWithoutPassword,
+            token,
+          },
           "登录成功",
           StatusCode.SUCCESS,
         );
