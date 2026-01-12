@@ -20,7 +20,7 @@ app.use("*", detailedLoggerMiddleware);
 registerRoutes(app);
 
 // Connect to PostgreSQL when starting the application
-connectDB().catch((error) => {
+connectDB(config).catch((error) => {
   console.error("Failed to start the application:", error);
   Deno.exit(1);
 });

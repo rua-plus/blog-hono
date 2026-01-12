@@ -1,7 +1,6 @@
 // Import PostgreSQL client
 import { Client } from "postgres";
-import { handleError } from "./config.ts";
-import { config } from "../main.ts";
+import { Config, handleError } from "./config.ts";
 
 // 通用错误处理函数
 export function formatErrorMessage(error: unknown, context: string): string {
@@ -21,20 +20,21 @@ export function formatErrorMessage(error: unknown, context: string): string {
 }
 
 // Extract PostgreSQL configuration
-const postgresConfig = config.postgresql;
 
 // Create PostgreSQL client
-export const db = new Client({
-  hostname: postgresConfig.host, // postgres.js uses 'hostname' instead of 'host'
-  port: postgresConfig.port,
-  database: postgresConfig.database,
-  user: postgresConfig.user,
-  password: postgresConfig.password,
-});
+export let db: null | Client = null;
 
 // Connect to the database (async function since connection is asynchronous)
-export async function connectDB() {
+export async function connectDB(config: Config) {
   try {
+    const postgresConfig = config.postgresql;
+    db = new Client({
+      hostname: postgresConfig.host, // postgres.js uses 'hostname' instead of 'host'
+      port: postgresConfig.port,
+      database: postgresConfig.database,
+      user: postgresConfig.user,
+      password: postgresConfig.password,
+    });
     await db.connect();
     console.log("Successfully connected to PostgreSQL database!");
   } catch (error: unknown) {
