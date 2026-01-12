@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { db, formatErrorMessage } from "../db.ts";
+import { db, formatErrorMessage } from "../utils/db.ts";
 import {
   honoErrorResponse,
   honoSuccessResponse,
@@ -37,4 +37,32 @@ export function registerRoutes(app: Hono) {
 
   registerUsers(app);
   registerPosts(app); // 添加文章路由注册
+
+  // 404 未找到路由处理
+  app.notFound((c) => {
+    return honoErrorResponse(
+      c,
+      "接口不存在",
+      StatusCode.RESOURCE_NOT_FOUND,
+    );
+  });
+
+  // 405 方法不允许处理
+  app.onError((err, c) => {
+    if (err instanceof Error && err.message.includes("Method Not Allowed")) {
+      return honoErrorResponse(
+        c,
+        "HTTP 方法不允许",
+        StatusCode.METHOD_NOT_ALLOWED,
+      );
+    }
+    // 其他错误处理
+    return honoErrorResponse(
+      c,
+      "服务器内部错误",
+      StatusCode.INTERNAL_ERROR,
+      undefined,
+      err instanceof Error ? err.message : "未知错误",
+    );
+  });
 }

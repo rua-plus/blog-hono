@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { db } from "../db.ts";
+import { db } from "../utils/db.ts";
 import {
   honoErrorResponse,
   honoSuccessResponse,

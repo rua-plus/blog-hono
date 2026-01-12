@@ -1,5 +1,7 @@
 // Import PostgreSQL client
 import { Client } from "postgres";
+import { handleError } from "./config.ts";
+import { config } from "../main.ts";
 
 // 通用错误处理函数
 export function formatErrorMessage(error: unknown, context: string): string {
@@ -16,40 +18,6 @@ export function formatErrorMessage(error: unknown, context: string): string {
     errorMessage = `Error ${context}: ${String(error)}`;
   }
   return errorMessage;
-}
-
-function handleError(error: unknown, context: string): never {
-  const errorMessage = formatErrorMessage(error, context);
-  console.error(errorMessage);
-  throw new Error(errorMessage);
-}
-
-// Read configuration from config.json
-let configFile: string;
-try {
-  configFile = Deno.readTextFileSync(
-    new URL("./config.json", import.meta.url),
-  );
-} catch (error: unknown) {
-  handleError(error, "reading config.json");
-}
-
-// Define configuration types
-interface Config {
-  postgresql: {
-    host: string;
-    port: number;
-    database: string;
-    user: string;
-    password: string;
-  };
-}
-
-let config: Config;
-try {
-  config = JSON.parse(configFile);
-} catch (error: unknown) {
-  handleError(error, "parsing config.json");
 }
 
 // Extract PostgreSQL configuration

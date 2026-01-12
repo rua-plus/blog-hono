@@ -10,6 +10,7 @@ export const enum StatusCode {
   HTTP_UNAUTHORIZED = 401,
   HTTP_FORBIDDEN = 403,
   HTTP_NOT_FOUND = 404,
+  HTTP_METHOD_NOT_ALLOWED = 405,
   HTTP_INTERNAL_ERROR = 500,
 
   // 业务成功状态码
@@ -34,6 +35,9 @@ export const enum StatusCode {
   // 资源错误（404xx）
   NOT_FOUND = 40400,
   RESOURCE_NOT_FOUND = 40401,
+
+  // 方法错误（405xx）
+  METHOD_NOT_ALLOWED = 40500,
 
   // 业务逻辑错误（409xx）
   CONFLICT = 40900,
