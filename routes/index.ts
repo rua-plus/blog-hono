@@ -11,8 +11,8 @@ export function registerRoutes(app: Hono) {
   app.get("/", (c) => {
     return honoSuccessResponse(
       c,
-      { message: "Hello Hono!" },
-      "欢迎使用博客API",
+      { message: "RUA" },
+      "RUA",
     );
   });
 

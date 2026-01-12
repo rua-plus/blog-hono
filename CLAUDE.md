@@ -75,13 +75,19 @@ deno fmt
 
 ### Core Modules
 
-1. **db.ts**: Database connection management
-   - Reads configuration from config.json
-   - Creates PostgreSQL client instance
-   - Exports connectDB(), closeDB(), and db client
-   - Handles errors with generic error handler
+1. **utils/config.ts**: Configuration management
+   - Defines Config interface for type safety
+   - Reads and parses configuration from config.json
+   - Handles errors with handleError() function
+   - Exports parseConfigFile() and handleError()
 
-2. **response.ts**: Response utilities
+2. **utils/db.ts**: Database connection management
+   - Imports PostgreSQL client from postgres.js
+   - Connects to PostgreSQL using configuration from config.json
+   - Exports connectDB() and closeDB() functions
+   - Handles errors with formatErrorMessage() function
+
+3. **response.ts**: Response utilities
    - Defines StatusCode enum with HTTP and business status codes
    - Provides response helper functions:
      - successResponse(): Standard success response
@@ -91,15 +97,18 @@ deno fmt
      - honoErrorResponse(): Hono-specific error response
      - honoPaginationResponse(): Hono-specific pagination response
 
-3. **middleware.ts**: Custom middleware
+4. **middleware.ts**: Custom middleware
    - requestIdMiddleware: Generates unique request ID for each request
    - detailedLoggerMiddleware: Logs detailed request/response information with
      requestId
    - jwtAuthMiddleware: JWT authentication middleware that verifies tokens and
      extracts user information
 
-4. **routes/**: API route handlers
+5. **routes/**: API route handlers
    - **index.ts**: Main route registration
+     - GET /: Returns "RUA" message (welcome endpoint)
+     - Handles 404 (Not Found) errors
+     - Handles 405 (Method Not Allowed) errors
    - **users.ts**: User-related routes
      - POST /users/create: Creates a new user with validation
      - POST /users/login: User login endpoint with JWT token generation
@@ -110,18 +119,22 @@ deno fmt
        (includes author information)
      - POST /posts/create: Creates a new post (requires JWT authentication)
 
-5. **utils/**: Utility functions
+6. **utils/**: Utility functions
    - **password.ts**: Password hashing and verification using Argon2
    - **jwt.ts**: JWT token generation and verification utilities
      - generateToken(): Generates JWT with custom payload
      - verifyToken(): Verifies and decodes JWT
      - generateUserToken(): Generates user-specific JWT with expiration
+   - **logger.ts**: Logger utility with various log levels and requestId support
 
-6. **test/**: Test files
+7. **types/**: Type definitions
+   - **context.ts**: Extends Hono context with user information for authenticated routes
+
+8. **test/**: Test files
    - **password.test.ts**: Tests for password hashing and verification
    - **jwt.test.ts**: Tests for JWT token generation and verification
 
-7. **lib/sql/**: Database schema (submodule)
+9. **lib/sql/**: Database schema (submodule)
    - Contains SQL files for initializing database tables (users, posts,
      categories, comments, tags, media)
 
@@ -148,8 +161,7 @@ available at `config.example.json`.
 
 ### API Routes
 
-- **GET /**: Returns "Hello Hono!" message (welcome endpoint)
-- **GET /db-version**: Tests PostgreSQL connection and returns version
+- **GET /**: Returns "RUA" message (welcome endpoint)
 - **POST /users/create**: Creates a new user with validation
 - **POST /users/login**: User login with username/email and password, returns
   JWT token
@@ -161,10 +173,13 @@ available at `config.example.json`.
 
 ### Error Handling
 
-- Generic error handler in `db.ts:handleError()`
+- Configuration errors handled in `utils/config.ts:handleError()`
+- Database errors handled in `utils/db.ts:formatErrorMessage()`
 - Error responses via `honoErrorResponse()` function
 - Success responses via `honoSuccessResponse()` function
 - Validation errors handled by Zod validator middleware
+- 404 errors handled by notFound middleware
+- 405 errors and other errors handled by onError middleware
 
 ### Database Schema
 
