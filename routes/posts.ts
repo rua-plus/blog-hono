@@ -25,6 +25,9 @@ interface Post {
 // 文章列表查询结果接口（包含作者信息）
 interface PostWithAuthor extends Post {
   author_name: string;
+  author_email: string;
+  author_avatar: string | null;
+  author_bio: string | null;
 }
 
 // 文章列表查询参数的 Zod 验证 schema
@@ -39,7 +42,7 @@ const ListPostsSchema = z.object({
 export function registerPosts(app: Hono) {
   // 列出文章路由（含分页和日期筛选）
   app.get(
-    "/posts/all",
+    "/posts/list",
     zValidator("query", ListPostsSchema, (result, c) => {
       if (!result.success) {
         const errors = result.error.issues.map((issue) => ({
@@ -64,7 +67,8 @@ export function registerPosts(app: Hono) {
 
         // 构建基础查询
         const baseQuery = `
-          SELECT p.*, u.username as author_name
+          SELECT p.id, p.title, p.slug, p.excerpt, p.author_id, p.status, p.created_at, p.updated_at,
+                 u.username as author_name, u.email as author_email, u.avatar_url as author_avatar, u.bio as author_bio
           FROM posts p
           LEFT JOIN users u ON p.author_id = u.id
         `;
