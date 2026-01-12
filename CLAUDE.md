@@ -97,6 +97,8 @@ deno fmt
    - **users.ts**: User-related routes
      - POST /users/create: Creates a new user with validation
      - POST /users/login: User login endpoint with JWT token generation
+   - **posts.ts**: Post-related routes
+     - GET /posts/all: Lists all posts with pagination, date filtering, and status filtering (includes author information)
 
 5. **utils/**: Utility functions
    - **password.ts**: Password hashing and verification using Argon2
@@ -107,6 +109,7 @@ deno fmt
 
 6. **test/**: Test files
    - **password.test.ts**: Tests for password hashing and verification
+   - **jwt.test.ts**: Tests for JWT token generation and verification
 
 7. **lib/sql/**: Database schema (submodule)
    - Contains SQL files for initializing database tables (users, posts, categories, comments, tags, media)
@@ -137,6 +140,7 @@ Database connection settings are stored in `config.json`. A template is availabl
 - **GET /db-version**: Tests PostgreSQL connection and returns version
 - **POST /users/create**: Creates a new user with validation
 - **POST /users/login**: User login with username/email and password, returns JWT token
+- **GET /posts/all**: Lists all posts with pagination, date filtering, and status filtering (includes author information)
 
 ### Error Handling
 
