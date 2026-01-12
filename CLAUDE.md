@@ -98,7 +98,8 @@ deno fmt
      - POST /users/create: Creates a new user with validation
      - POST /users/login: User login endpoint with JWT token generation
    - **posts.ts**: Post-related routes
-     - GET /posts/all: Lists all posts with pagination, date filtering, and status filtering (includes author information)
+     - GET /posts/list: Lists all posts with pagination, date filtering, and status filtering (includes author information)
+     - GET /posts/:postId: Gets detailed information of a single post by ID (includes author information)
 
 5. **utils/**: Utility functions
    - **password.ts**: Password hashing and verification using Argon2
@@ -140,7 +141,8 @@ Database connection settings are stored in `config.json`. A template is availabl
 - **GET /db-version**: Tests PostgreSQL connection and returns version
 - **POST /users/create**: Creates a new user with validation
 - **POST /users/login**: User login with username/email and password, returns JWT token
-- **GET /posts/all**: Lists all posts with pagination, date filtering, and status filtering (includes author information)
+- **GET /posts/list**: Lists all posts with pagination, date filtering, and status filtering (includes author information)
+- **GET /posts/:postId**: Gets detailed information of a single post by ID (includes author information)
 
 ### Error Handling
 

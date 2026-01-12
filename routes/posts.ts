@@ -5,6 +5,7 @@ import { db } from "../db.ts";
 import {
   honoErrorResponse,
   honoPaginationResponse,
+  honoSuccessResponse,
   StatusCode,
 } from "../response.ts";
 
@@ -39,7 +40,77 @@ const ListPostsSchema = z.object({
   status: z.string().optional(), // 可选的状态筛选: draft, published, archived
 });
 
+// 文章详情查询参数的 Zod 验证 schema
+const GetPostSchema = z.object({
+  postId: z.string().transform(Number), // 文章ID，转换为数字类型
+});
+
 export function registerPosts(app: Hono) {
+  // 获取单个文章详情路由
+  app.get(
+    "/posts/:postId",
+    zValidator("param", GetPostSchema, (result, c) => {
+      if (!result.success) {
+        const errors = result.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        }));
+        return honoErrorResponse(
+          c,
+          "请求参数验证失败",
+          StatusCode.VALIDATION_ERROR,
+          errors,
+        );
+      }
+    }),
+    async (c) => {
+      try {
+        // 获取验证后的路径参数
+        const { postId } = c.req.valid("param");
+
+        // 查询文章详情（包含完整内容和作者信息）
+        const query = `
+          SELECT p.id, p.title, p.slug, p.content, p.excerpt, p.author_id, p.status, p.published_at, p.created_at, p.updated_at,
+                 u.username as author_name, u.email as author_email, u.avatar_url as author_avatar, u.bio as author_bio
+          FROM posts p
+          LEFT JOIN users u ON p.author_id = u.id
+          WHERE p.id = $1
+        `;
+
+        const result = await db.queryObject<PostWithAuthor>({
+          text: query,
+          args: [postId],
+        });
+
+        // 检查文章是否存在
+        if (result.rows.length === 0) {
+          return honoErrorResponse(
+            c,
+            "文章不存在",
+            StatusCode.RESOURCE_NOT_FOUND,
+          );
+        }
+
+        // 返回文章详情
+        return honoSuccessResponse(
+          c,
+          result.rows[0],
+          "文章详情查询成功",
+          StatusCode.SUCCESS,
+        );
+      } catch (error) {
+        // 处理错误
+        return honoErrorResponse(
+          c,
+          "服务器内部错误",
+          StatusCode.INTERNAL_ERROR,
+          undefined,
+          error instanceof Error ? error.message : "Unknown error",
+        );
+      }
+    },
+  );
+
   // 列出文章路由（含分页和日期筛选）
   app.get(
     "/posts/list",
