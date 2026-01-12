@@ -6,7 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A simple blog API built with Hono (web framework) and PostgreSQL (database) in Deno.
+A simple blog API built with Hono (web framework) and PostgreSQL (database) in
+Deno.
 
 ## Key Technologies
 
@@ -28,6 +29,7 @@ deno task start
 ```
 
 This runs the API server with required permissions:
+
 - --allow-net: Allow network access
 - --allow-read: Allow file reading (for config.json)
 - --allow-env: Allow environment access
@@ -40,6 +42,7 @@ deno test
 ```
 
 To run a single test file:
+
 ```bash
 deno test test/password.test.ts
 ```
@@ -61,6 +64,7 @@ deno fmt
 ### Main Entry Point
 
 **main.ts** - Entry point of the application
+
 - Creates Hono app instance
 - Enables CORS middleware
 - Enables request ID middleware
@@ -89,8 +93,10 @@ deno fmt
 
 3. **middleware.ts**: Custom middleware
    - requestIdMiddleware: Generates unique request ID for each request
-   - detailedLoggerMiddleware: Logs detailed request/response information with requestId
-   - jwtAuthMiddleware: JWT authentication middleware that verifies tokens and extracts user information
+   - detailedLoggerMiddleware: Logs detailed request/response information with
+     requestId
+   - jwtAuthMiddleware: JWT authentication middleware that verifies tokens and
+     extracts user information
 
 4. **routes/**: API route handlers
    - **index.ts**: Main route registration
@@ -98,8 +104,10 @@ deno fmt
      - POST /users/create: Creates a new user with validation
      - POST /users/login: User login endpoint with JWT token generation
    - **posts.ts**: Post-related routes
-     - GET /posts/list: Lists all posts with pagination, date filtering, and status filtering (includes author information)
-     - GET /posts/:postId: Gets detailed information of a single post by ID (includes author information)
+     - GET /posts/list: Lists all posts with pagination, date filtering, and
+       status filtering (includes author information)
+     - GET /posts/:postId: Gets detailed information of a single post by ID
+       (includes author information)
      - POST /posts/create: Creates a new post (requires JWT authentication)
 
 5. **utils/**: Utility functions
@@ -114,11 +122,13 @@ deno fmt
    - **jwt.test.ts**: Tests for JWT token generation and verification
 
 7. **lib/sql/**: Database schema (submodule)
-   - Contains SQL files for initializing database tables (users, posts, categories, comments, tags, media)
+   - Contains SQL files for initializing database tables (users, posts,
+     categories, comments, tags, media)
 
 ### Configuration
 
-Database connection settings are stored in `config.json`. A template is available at `config.example.json`.
+Database connection settings are stored in `config.json`. A template is
+available at `config.example.json`.
 
 ```json
 {
@@ -141,9 +151,12 @@ Database connection settings are stored in `config.json`. A template is availabl
 - **GET /**: Returns "Hello Hono!" message (welcome endpoint)
 - **GET /db-version**: Tests PostgreSQL connection and returns version
 - **POST /users/create**: Creates a new user with validation
-- **POST /users/login**: User login with username/email and password, returns JWT token
-- **GET /posts/list**: Lists all posts with pagination, date filtering, and status filtering (includes author information)
-- **GET /posts/:postId**: Gets detailed information of a single post by ID (includes author information)
+- **POST /users/login**: User login with username/email and password, returns
+  JWT token
+- **GET /posts/list**: Lists all posts with pagination, date filtering, and
+  status filtering (includes author information)
+- **GET /posts/:postId**: Gets detailed information of a single post by ID
+  (includes author information)
 - **POST /posts/create**: Creates a new post (requires JWT authentication)
 
 ### Error Handling
@@ -155,11 +168,16 @@ Database connection settings are stored in `config.json`. A template is availabl
 
 ### Database Schema
 
-The database schema is defined in `lib/sql/sql/init.sql` and includes the following tables:
+The database schema is defined in `lib/sql/sql/init.sql` and includes the
+following tables:
 
-1. **users**: User information (id, username, email, password_hash, avatar_url, bio, last_login, created_at, updated_at)
-2. **posts**: Blog posts (id, title, slug, content, excerpt, author_id, status, published_at, created_at, updated_at)
+1. **users**: User information (id, username, email, password_hash, avatar_url,
+   bio, last_login, created_at, updated_at)
+2. **posts**: Blog posts (id, title, slug, content, excerpt, author_id, status,
+   published_at, created_at, updated_at)
 3. **categories**: Post categories (id, name, slug, description, parent_id)
-4. **comments**: Post comments (id, post_id, user_id, parent_id, author_name, author_email, content, status, created_at, updated_at)
+4. **comments**: Post comments (id, post_id, user_id, parent_id, author_name,
+   author_email, content, status, created_at, updated_at)
 5. **tags**: Post tags (id, name, slug)
-6. **media**: Media files (id, filename, file_path, file_type, file_size, uploader_id, alt_text, created_at)
+6. **media**: Media files (id, filename, file_path, file_type, file_size,
+   uploader_id, alt_text, created_at)

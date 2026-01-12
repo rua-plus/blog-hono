@@ -46,7 +46,8 @@ deno task start
 
 ### Database Connection
 
-The database connection is managed in `lib/db.ts`. It reads configuration from `config.json` and provides the `db` client instance.
+The database connection is managed in `lib/db.ts`. It reads configuration from
+`config.json` and provides the `db` client instance.
 
 ### Adding New Routes
 

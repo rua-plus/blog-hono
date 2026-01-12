@@ -1,5 +1,5 @@
 import { assertEquals, assertRejects } from "$std/assert";
-import { generateToken, verifyToken, generateUserToken } from "../utils/jwt.ts";
+import { generateToken, generateUserToken, verifyToken } from "../utils/jwt.ts";
 
 Deno.test("JWT - generate and verify token with custom payload", async () => {
   const payload = {
@@ -33,7 +33,7 @@ Deno.test("JWT - verifyToken rejects expired token", async () => {
   await assertRejects(
     async () => await verifyToken(token),
     Error,
-    "expired"
+    "expired",
   );
 });
 
@@ -48,7 +48,7 @@ Deno.test("JWT - verifyToken rejects invalid token format", async () => {
   for (const token of invalidTokens) {
     await assertRejects(
       async () => await verifyToken(token),
-      Error
+      Error,
     );
   }
 });
@@ -77,7 +77,11 @@ Deno.test("JWT - generateUserToken creates token with correct user data", async 
 });
 
 Deno.test("JWT - generateUserToken creates token with unique payload for different users", async () => {
-  const token1 = await generateUserToken("user-1", "alice", "alice@example.com");
+  const token1 = await generateUserToken(
+    "user-1",
+    "alice",
+    "alice@example.com",
+  );
   const token2 = await generateUserToken("user-2", "bob", "bob@example.com");
 
   const decoded1 = await verifyToken(token1);

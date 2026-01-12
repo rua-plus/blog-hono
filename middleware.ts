@@ -55,7 +55,9 @@ export async function detailedLoggerMiddleware(c: Context, next: Next) {
     const contentLength = c.res.headers.get("content-length") || "-";
 
     console.log(
-      `[${new Date().toISOString()}] [${requestId}] ${method} ${url} - ${status} (${duration}ms)`,
+      `[${
+        new Date().toISOString()
+      }] [${requestId}] ${method} ${url} - ${status} (${duration}ms)`,
       {
         requestId,
         method,
@@ -74,7 +76,9 @@ export async function detailedLoggerMiddleware(c: Context, next: Next) {
     const duration = end - start;
 
     console.error(
-      `[${new Date().toISOString()}] [${requestId}] ${method} ${url} - ERROR (${duration}ms)`,
+      `[${
+        new Date().toISOString()
+      }] [${requestId}] ${method} ${url} - ERROR (${duration}ms)`,
       {
         requestId,
         method,

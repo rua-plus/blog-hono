@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import type { Context } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { db } from "../db.ts";
@@ -10,7 +9,7 @@ import {
   StatusCode,
 } from "../response.ts";
 import { jwtAuthMiddleware } from "../middleware.ts";
-import type { JWTPayload } from "../utils/jwt.ts";
+import type { ContextWithUser } from "../types/context.ts";
 
 // 文章数据类型接口（与数据库表结构匹配）
 interface Post {
@@ -50,8 +49,14 @@ const GetPostSchema = z.object({
 
 // 创建文章请求的 Zod 验证 schema
 const CreatePostSchema = z.object({
-  title: z.string().min(1, "文章标题不能为空").max(200, "文章标题长度不能超过200个字符"),
-  slug: z.string().min(1, "URL标识不能为空").max(200, "URL标识长度不能超过200个字符"),
+  title: z.string().min(1, "文章标题不能为空").max(
+    200,
+    "文章标题长度不能超过200个字符",
+  ),
+  slug: z.string().min(1, "URL标识不能为空").max(
+    200,
+    "URL标识长度不能超过200个字符",
+  ),
   content: z.string().min(1, "文章内容不能为空"),
   excerpt: z.string().max(500, "文章摘要长度不能超过500个字符").optional(),
   status: z.enum(["draft", "published", "archived"]).default("draft"),
@@ -80,11 +85,6 @@ export function registerPosts(app: Hono) {
     async (c) => {
       try {
         // 获取当前登录用户信息
-        // 扩展 Context 类型以支持 user 属性
-        interface ContextWithUser extends Context {
-          get(key: "user"): JWTPayload;
-          set(key: "user", value: JWTPayload): void;
-        }
         const user = (c as unknown as ContextWithUser).get("user");
         if (!user || !user.id) {
           return honoErrorResponse(
@@ -100,13 +100,17 @@ export function registerPosts(app: Hono) {
         // 处理发布时间
         let publishedAt = null;
         if (body.status === "published") {
-          publishedAt = body.published_at ? new Date(body.published_at) : new Date();
+          publishedAt = body.published_at
+            ? new Date(body.published_at)
+            : new Date();
         }
 
         // 插入文章到数据库
         const result = await db.queryObject`
           INSERT INTO posts (title, slug, content, excerpt, author_id, status, published_at)
-          VALUES (${body.title}, ${body.slug}, ${body.content}, ${body.excerpt}, ${parseInt(user.id)}, ${body.status}, ${publishedAt})
+          VALUES (${body.title}, ${body.slug}, ${body.content}, ${body.excerpt}, ${
+          parseInt(user.id)
+        }, ${body.status}, ${publishedAt})
           RETURNING id, title, slug, content, excerpt, author_id, status, published_at, created_at, updated_at
         `;
 
@@ -130,7 +134,9 @@ export function registerPosts(app: Hono) {
         // 处理数据库唯一性约束错误（slug 已存在）
         if (
           error instanceof Error &&
-          (error.message.includes("duplicate key value violates unique constraint") ||
+          (error.message.includes(
+            "duplicate key value violates unique constraint",
+          ) ||
             error.message.includes("posts_slug_key"))
         ) {
           return honoErrorResponse(
