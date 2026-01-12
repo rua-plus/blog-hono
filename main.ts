@@ -4,9 +4,24 @@ import { connectDB } from "./utils/db.ts";
 import { registerRoutes } from "./routes/index.ts";
 import { detailedLoggerMiddleware, requestIdMiddleware } from "./middleware.ts";
 import { parseConfigFile } from "./utils/config.ts";
+import { Client } from "postgres";
 
 const app = new Hono();
 export const config = parseConfigFile("./config.json");
+// Connect to PostgreSQL when starting the application
+// DB allways exist or app will exit
+export let db = null as unknown as Client;
+try {
+  db = await connectDB(config);
+} catch (error) {
+  console.error("Failed to start the application:", error);
+  Deno.exit(1);
+}
+
+if (db == null) {
+  console.error("Failed to connect to PostgreSQL");
+  Deno.exit(1);
+}
 
 // 启用 CORS 中间件，允许所有跨域请求
 app.use("*", cors());
@@ -18,11 +33,5 @@ app.use("*", requestIdMiddleware);
 app.use("*", detailedLoggerMiddleware);
 
 registerRoutes(app);
-
-// Connect to PostgreSQL when starting the application
-connectDB(config).catch((error) => {
-  console.error("Failed to start the application:", error);
-  Deno.exit(1);
-});
 
 Deno.serve(app.fetch);

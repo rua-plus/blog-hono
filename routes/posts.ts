@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { db } from "../utils/db.ts";
+import { db } from "../main.ts";
 import {
   honoErrorResponse,
   honoPaginationResponse,
@@ -64,15 +64,6 @@ const CreatePostSchema = z.object({
 });
 
 export function registerPosts(app: Hono) {
-  // 明确处理 GET 请求，返回方法不允许的响应
-  app.get("/posts/create", (c) => {
-    return honoErrorResponse(
-      c,
-      "HTTP 方法不允许",
-      StatusCode.METHOD_NOT_ALLOWED,
-    );
-  });
-
   // 创建文章路由（需要 JWT 登录验证）
   app.post(
     "/posts/create",

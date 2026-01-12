@@ -19,16 +19,11 @@ export function formatErrorMessage(error: unknown, context: string): string {
   return errorMessage;
 }
 
-// Extract PostgreSQL configuration
-
-// Create PostgreSQL client
-export let db: null | Client = null;
-
 // Connect to the database (async function since connection is asynchronous)
 export async function connectDB(config: Config) {
   try {
     const postgresConfig = config.postgresql;
-    db = new Client({
+    const db = new Client({
       hostname: postgresConfig.host, // postgres.js uses 'hostname' instead of 'host'
       port: postgresConfig.port,
       database: postgresConfig.database,
@@ -37,13 +32,14 @@ export async function connectDB(config: Config) {
     });
     await db.connect();
     console.log("Successfully connected to PostgreSQL database!");
+    return db;
   } catch (error: unknown) {
     handleError(error, "connecting to PostgreSQL database");
   }
 }
 
 // Close database connection (async function)
-export async function closeDB() {
+export async function closeDB(db: Client) {
   try {
     await db.end();
     console.log("Successfully closed PostgreSQL database connection!");

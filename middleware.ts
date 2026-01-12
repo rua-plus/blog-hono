@@ -2,6 +2,7 @@ import type { Context, Next } from "hono";
 import { nanoid } from "@sitnik/nanoid";
 import { verifyToken } from "./utils/jwt.ts";
 import { honoErrorResponse, StatusCode } from "./response.ts";
+import { logger } from "./utils/logger.ts";
 
 // 请求ID中间件
 export async function requestIdMiddleware(c: Context, next: Next) {
@@ -26,23 +27,10 @@ export function getRequestId(c: Context): string {
 // 详细日志中间件（包含 requestId）
 export async function detailedLoggerMiddleware(c: Context, next: Next) {
   const start = Date.now();
-  const requestId = getRequestId(c);
-  const { method, url } = c.req;
-  const userAgent = c.req.header("user-agent") || "-";
-  const remoteAddr = c.req.header("x-forwarded-for") || "-";
+  const log = logger(c);
 
   // 打印请求日志
-  console.log(
-    `[${new Date().toISOString()}] [${requestId}] ${method} ${url} - START`,
-    {
-      requestId,
-      method,
-      url,
-      userAgent,
-      remoteAddr,
-      timestamp: new Date().toISOString(),
-    },
-  );
+  log.start();
 
   try {
     // 继续处理请求
@@ -52,45 +40,12 @@ export async function detailedLoggerMiddleware(c: Context, next: Next) {
     const end = Date.now();
     const duration = end - start;
     const status = c.res.status;
-    const contentLength = c.res.headers.get("content-length") || "-";
-
-    console.log(
-      `[${
-        new Date().toISOString()
-      }] [${requestId}] ${method} ${url} - ${status} (${duration}ms)`,
-      {
-        requestId,
-        method,
-        url,
-        status,
-        duration: `${duration}ms`,
-        contentLength,
-        userAgent,
-        remoteAddr,
-        timestamp: new Date().toISOString(),
-      },
-    );
+    log.end(status, duration);
   } catch (error) {
     // 打印错误日志
     const end = Date.now();
     const duration = end - start;
-
-    console.error(
-      `[${
-        new Date().toISOString()
-      }] [${requestId}] ${method} ${url} - ERROR (${duration}ms)`,
-      {
-        requestId,
-        method,
-        url,
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        duration: `${duration}ms`,
-        userAgent,
-        remoteAddr,
-        timestamp: new Date().toISOString(),
-      },
-    );
+    log.requestError(error, duration);
 
     throw error;
   }
