@@ -8,7 +8,7 @@ interface JwtConfig {
 }
 
 // JWT 负载类型
-interface JWTPayload {
+export interface JWTPayload {
   id: string;
   username: string;
   email: string;

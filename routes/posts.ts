@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import type { Context } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { db } from "../db.ts";
@@ -9,6 +10,7 @@ import {
   StatusCode,
 } from "../response.ts";
 import { jwtAuthMiddleware } from "../middleware.ts";
+import type { JWTPayload } from "../utils/jwt.ts";
 
 // 文章数据类型接口（与数据库表结构匹配）
 interface Post {
@@ -78,7 +80,12 @@ export function registerPosts(app: Hono) {
     async (c) => {
       try {
         // 获取当前登录用户信息
-        const user = c.get("user");
+        // 扩展 Context 类型以支持 user 属性
+        interface ContextWithUser extends Context {
+          get(key: "user"): JWTPayload;
+          set(key: "user", value: JWTPayload): void;
+        }
+        const user = (c as unknown as ContextWithUser).get("user");
         if (!user || !user.id) {
           return honoErrorResponse(
             c,
