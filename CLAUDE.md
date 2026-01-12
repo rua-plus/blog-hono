@@ -100,6 +100,7 @@ deno fmt
    - **posts.ts**: Post-related routes
      - GET /posts/list: Lists all posts with pagination, date filtering, and status filtering (includes author information)
      - GET /posts/:postId: Gets detailed information of a single post by ID (includes author information)
+     - POST /posts/create: Creates a new post (requires JWT authentication)
 
 5. **utils/**: Utility functions
    - **password.ts**: Password hashing and verification using Argon2
@@ -143,6 +144,7 @@ Database connection settings are stored in `config.json`. A template is availabl
 - **POST /users/login**: User login with username/email and password, returns JWT token
 - **GET /posts/list**: Lists all posts with pagination, date filtering, and status filtering (includes author information)
 - **GET /posts/:postId**: Gets detailed information of a single post by ID (includes author information)
+- **POST /posts/create**: Creates a new post (requires JWT authentication)
 
 ### Error Handling
 

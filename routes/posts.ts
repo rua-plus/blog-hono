@@ -8,6 +8,7 @@ import {
   honoSuccessResponse,
   StatusCode,
 } from "../response.ts";
+import { jwtAuthMiddleware } from "../middleware.ts";
 
 // 文章数据类型接口（与数据库表结构匹配）
 interface Post {
@@ -45,7 +46,105 @@ const GetPostSchema = z.object({
   postId: z.string().transform(Number), // 文章ID，转换为数字类型
 });
 
+// 创建文章请求的 Zod 验证 schema
+const CreatePostSchema = z.object({
+  title: z.string().min(1, "文章标题不能为空").max(200, "文章标题长度不能超过200个字符"),
+  slug: z.string().min(1, "URL标识不能为空").max(200, "URL标识长度不能超过200个字符"),
+  content: z.string().min(1, "文章内容不能为空"),
+  excerpt: z.string().max(500, "文章摘要长度不能超过500个字符").optional(),
+  status: z.enum(["draft", "published", "archived"]).default("draft"),
+  published_at: z.string().optional(), // ISO 日期时间格式
+});
+
 export function registerPosts(app: Hono) {
+  // 创建文章路由（需要 JWT 登录验证）
+  app.post(
+    "/posts/create",
+    jwtAuthMiddleware, // 使用 JWT 认证中间件
+    zValidator("json", CreatePostSchema, (result, c) => {
+      if (!result.success) {
+        const errors = result.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        }));
+        return honoErrorResponse(
+          c,
+          "请求参数验证失败",
+          StatusCode.VALIDATION_ERROR,
+          errors,
+        );
+      }
+    }),
+    async (c) => {
+      try {
+        // 获取当前登录用户信息
+        const user = c.get("user");
+        if (!user || !user.id) {
+          return honoErrorResponse(
+            c,
+            "用户信息获取失败",
+            StatusCode.UNAUTHORIZED,
+          );
+        }
+
+        // 获取验证后的请求体
+        const body = c.req.valid("json");
+
+        // 处理发布时间
+        let publishedAt = null;
+        if (body.status === "published") {
+          publishedAt = body.published_at ? new Date(body.published_at) : new Date();
+        }
+
+        // 插入文章到数据库
+        const result = await db.queryObject`
+          INSERT INTO posts (title, slug, content, excerpt, author_id, status, published_at)
+          VALUES (${body.title}, ${body.slug}, ${body.content}, ${body.excerpt}, ${parseInt(user.id)}, ${body.status}, ${publishedAt})
+          RETURNING id, title, slug, content, excerpt, author_id, status, published_at, created_at, updated_at
+        `;
+
+        // 检查是否插入成功
+        if (result.rows.length === 0) {
+          return honoErrorResponse(
+            c,
+            "文章创建失败",
+            StatusCode.INTERNAL_ERROR,
+          );
+        }
+
+        // 返回成功响应
+        return honoSuccessResponse(
+          c,
+          result.rows[0],
+          "文章创建成功",
+          StatusCode.CREATED,
+        );
+      } catch (error) {
+        // 处理数据库唯一性约束错误（slug 已存在）
+        if (
+          error instanceof Error &&
+          (error.message.includes("duplicate key value violates unique constraint") ||
+            error.message.includes("posts_slug_key"))
+        ) {
+          return honoErrorResponse(
+            c,
+            "URL标识已存在",
+            StatusCode.DUPLICATE_RESOURCE,
+          );
+        }
+
+        // 处理其他错误
+        return honoErrorResponse(
+          c,
+          "服务器内部错误",
+          StatusCode.INTERNAL_ERROR,
+          undefined,
+          error instanceof Error ? error.message : "Unknown error",
+        );
+      }
+    },
+  );
+
   // 获取单个文章详情路由
   app.get(
     "/posts/:postId",
